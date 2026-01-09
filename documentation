@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java-annotation-report>
+  <metadata>
+    <title>Лабораторная работа №6: Пользовательские аннотации</title>
+    <author>Alena</author>
+    <date>2026-01-10</date>
+    <description>Демонстрация разработки и обработки пользовательских аннотаций.</description>
+  </metadata>
+
+  <annotations>
+    <!-- @Cache -->
+    <annotation name="Cache">
+      <qualified-name>Cache</qualified-name>
+      <target>ELEMENT_TYPE.TYPE</target>
+      <retention>RUNTIME</retention>
+      <description>Аннотация для указания кешируемых областей. Применяется только к типам.</description>
+      <attributes>
+        <attribute name="value" type="java.lang.String[]" optional="true" default="{}">
+          <description>Массив строк с именами кешируемых областей.</description>
+        </attribute>
+      </attributes>
+      <example>@Cache({"users", "sessions"})</example>
+    </annotation>
+
+    <!-- @Default -->
+    <annotation name="Default">
+      <qualified-name>Default</qualified-name>
+      <target>ELEMENT_TYPE.TYPE, ELEMENT_TYPE.FIELD</target>
+      <retention>RUNTIME</retention>
+      <description>Аннотация, указывающая тип по умолчанию. Обязательное свойство: value (Class).</description>
+      <attributes>
+        <attribute name="value" type="java.lang.Class&lt;?&gt;" optional="false">
+          <description>Класс, используемый по умолчанию.</description>
+        </attribute>
+      </attributes>
+      <example>@Default(String.class)</example>
+    </annotation>
+
+    <!-- @Invoke -->
+    <annotation name="Invoke">
+      <qualified-name>Invoke</qualified-name>
+      <target>ELEMENT_TYPE.METHOD</target>
+      <retention>RUNTIME</retention>
+      <description>Маркерная аннотация для методов, подлежащих автоматическому вызову.</description>
+      <attributes/>
+      <example>@Invoke public void onStart() { ... }</example>
+    </annotation>
+
+    <!-- @ToString -->
+    <annotation name="ToString">
+      <qualified-name>ToString</qualified-name>
+      <target>ELEMENT_TYPE.TYPE, ELEMENT_TYPE.FIELD</target>
+      <retention>RUNTIME</retention>
+      <description>Управляет включением поля или класса в строковое представление объекта.</description>
+      <attributes>
+        <attribute name="value" type="Mode" optional="true" default="Mode.YES">
+          <description>Режим отображения: YES — включить, NO — исключить.</description>
+        </attribute>
+      </attributes>
+      <example>@ToString(Mode.NO) public String password;</example>
+    </annotation>
+
+    <!-- @Two -->
+    <annotation name="Two">
+      <qualified-name>Two</qualified-name>
+      <target>ELEMENT_TYPE.TYPE</target>
+      <retention>RUNTIME</retention>
+      <description>Аннотация с двумя обязательными свойствами: строка и число.</description>
+      <attributes>
+        <attribute name="first" type="java.lang.String" optional="false">
+          <description>Строковое значение (не должно быть пустым).</description>
+        </attribute>
+        <attribute name="second" type="int" optional="false">
+          <description>Целое число (должно быть >= 0).</description>
+        </attribute>
+      </attributes>
+      <validation>
+        <rule>first != null &amp;&amp; !first.isEmpty()</rule>
+        <rule>second &gt;= 0</rule>
+      </validation>
+      <example>@Two(first = "Laboratory", second = 6)</example>
+    </annotation>
+
+    <!-- @Validate -->
+    <annotation name="Validate">
+      <qualified-name>Validate</qualified-name>
+      <target>ELEMENT_TYPE.TYPE, ELEMENT_TYPE.ANNOTATION_TYPE</target>
+      <retention>RUNTIME</retention>
+      <description>Аннотация для указания списка классов, подлежащих проверке.</description>
+      <attributes>
+        <attribute name="value" type="java.lang.Class&lt;?&gt;[]" optional="false">
+          <description>Массив классов для валидации.</description>
+        </attribute>
+      </attributes>
+      <example>@Validate({String.class, Integer.class})</example>
+    </annotation>
+  </annotations>
+
+  <enums>
+    <enum name="Mode">
+      <description>Режим отображения поля в строковом представлении.</description>
+      <constants>
+        <constant name="YES">
+          <description>Поле должно быть включено.</description>
+        </constant>
+        <constant name="NO">
+          <description>Поле должно быть исключено.</description>
+        </constant>
+      </constants>
+    </enum>
+  </enums>
+
+  <example-classes>
+    <class name="CacheExample">
+      <annotation-ref>@Cache({"users", "sessions", "profiles"})</annotation-ref>
+    </class>
+    <class name="DefaultExample">
+      <annotation-ref>@Default(String.class)</annotation-ref>
+    </class>
+    <class name="InvokeExample">
+      <annotation-ref>@Invoke on method doSomething()</annotation-ref>
+      <field name="wasCalled" type="boolean">Флаг вызова аннотированного метода.</field>
+    </class>
+    <class name="ToStringExample">
+      <annotation-ref>@ToString на классе и полях</annotation-ref>
+      <field name="name" annotation="@ToString(Mode.YES)"/>
+      <field name="secret" annotation="@ToString(Mode.NO)"/>
+    </class>
+    <class name="TwoExample">
+      <annotation-ref>@Two(first = "Laboratory", second = 6)</annotation-ref>
+    </class>
+    <class name="TwoInvalidExample">
+      <annotation-ref>@Two(first = "", second = -1) — НЕКОРРЕКТНЫЕ значения</annotation-ref>
+    </class>
+    <class name="ValidateExample">
+      <annotation-ref>@Validate({String.class, Integer.class, ArrayList.class})</annotation-ref>
+    </class>
+  </example-classes>
+
+  <test-classes>
+    <class name="InvokeAnnotationTest">
+      <description>Проверяет, что метод с @Invoke вызывается и изменяет состояние.</description>
+      <tested-annotation>Invoke</tested-annotation>
+    </class>
+    <class name="TwoAnnotationValidationTest">
+      <description>Проверяет валидацию @Two: корректные значения — OK, некорректные — исключение.</description>
+      <tested-annotation>Two</tested-annotation>
+    </class>
+  </test-classes>
+
+  <main-class name="Main">
+    <description>Демонстрация всех аннотаций через рефлексию.</description>
+    <methods>
+      <method name="invokeAnnotatedMethods">Вызывает все @Invoke-методы.</method>
+      <method name="processDefaultAnnotation">Выводит класс из @Default.</method>
+      <method name="buildToString">Формирует строковое представление с учётом @ToString.</method>
+      <method name="processValidateAnnotation">Выводит классы из @Validate.</method>
+      <method name="processTwoAnnotation">Выводит значения @Two.</method>
+      <method name="processCacheAnnotation">Выводит области из @Cache.</method>
+      <method name="validateTwoAnnotation">Проверяет корректность @Two.</method>
+    </methods>
+    <entry-point>public static void main(String[] args)</entry-point>
+  </main-class>
+
+  <validation-rules>
+    <rule annotation="Two">
+      <condition>first must not be null or empty</condition>
+      <condition>second must be non-negative</condition>
+      <exception>IllegalArgumentException</exception>
+    </rule>
+  </validation-rules>
+</java-annotation-report>
