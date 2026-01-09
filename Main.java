@@ -1,18 +1,43 @@
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-
 /**
- * Главный класс лабораторной работы №6.
- * Демонстрирует работу всех аннотаций и их обработчиков.
+ * <p>Главный класс лабораторной работы №6, демонстрирующий применение и обработку
+ * пользовательских аннотаций через рефлексию.</p>
+ *
+ * <p>Класс содержит статические методы для обработки следующих аннотаций:
+ * <ul>
+ *   <li>{@link Invoke} — автоматический вызов методов;</li>
+ *   <li>{@link Default} — получение класса по умолчанию;</li>
+ *   <li>{@link ToString} — формирование строкового представления с учётом режима отображения полей;</li>
+ *   <li>{@link Validate} — вывод списка классов, подлежащих проверке;</li>
+ *   <li>{@link Two} — чтение и валидация двух обязательных параметров;</li>
+ *   <li>{@link Cache} — получение списка кешируемых областей.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>Точка входа {@link #main(String[])} последовательно демонстрирует работу
+ * всех аннотаций на примере тестовых классов, таких как {@link InvokeExample},
+ * {@link DefaultExample}, {@link ToStringExample} и других.</p>
+ *
+ * <p>Класс предназначен исключительно для учебных целей и демонстрации возможностей
+ * метапрограммирования в Java с использованием аннотаций и рефлексии.</p>
+ *
+ * @see Invoke
+ * @see Default
+ * @see ToString
+ * @see Validate
+ * @see Two
+ * @see Cache
  */
 public class Main {
 
     /**
-     * Обрабатывает объект, вызывая все методы, помеченные аннотацией @Invoke.
+     * Вызывает все методы объекта, помеченные аннотацией {@link Invoke}.
+     *
+     * <p>Метод использует рефлексию для поиска и вызова аннотированных методов.
+     * Все методы делаются доступными через {@link java.lang.reflect.AccessibleObject#setAccessible(boolean)}.
+     * Ошибки при вызове перехватываются и выводятся в {@code System.err}.</p>
      *
      * @param obj объект, методы которого необходимо проверить и вызвать
-     * @throws IllegalArgumentException если объект равен null
+     * @throws IllegalArgumentException если передан {@code null}
      */
     public static void invokeAnnotatedMethods(Object obj) {
         if (obj == null) {
@@ -32,9 +57,12 @@ public class Main {
     }
 
     /**
-     * Выводит имя класса, указанного в аннотации @Default.
+     * Выводит простое имя класса, указанного в аннотации {@link Default} на уровне типа.
      *
-     * @param clazz класс, аннотированный @Default
+     * <p>Если аннотация отсутствует, выводится соответствующее сообщение.
+     * Метод безопасен к передаче {@code null}.</p>
+     *
+     * @param clazz класс, аннотированный {@link Default}
      */
     public static void processDefaultAnnotation(Class<?> clazz) {
         if (clazz == null) {
@@ -50,11 +78,19 @@ public class Main {
     }
 
     /**
-     * Формирует строковое представление объекта, учитывая только поля,
-     * помеченные @ToString со значением Mode.YES.
+     * Формирует строковое представление объекта, включая только поля,
+     * разрешённые аннотацией {@link ToString}.
+     *
+     * <p>Поведение определяется следующим образом:
+     * <ul>
+     *   <li>Если поле имеет собственную аннотацию {@code @ToString}, используется её {@code value};</li>
+     *   <li>Если аннотации на поле нет, но она присутствует на классе — используется значение уровня класса;</li>
+     *   <li>Если аннотация отсутствует везде, поле включается по умолчанию ({@link Mode#YES}).</li>
+     * </ul>
+     * </p>
      *
      * @param obj объект для преобразования
-     * @return строковое представление объекта
+     * @return строковое представление в формате {@code ClassName { field1=value1, field2=value2 }}
      */
     public static String buildToString(Object obj) {
         if (obj == null) return "null";
@@ -90,9 +126,12 @@ public class Main {
     }
 
     /**
-     * Выводит список классов, указанных в аннотации @Validate.
+     * Выводит список классов, указанных в аннотации {@link Validate}.
      *
-     * @param clazz класс с аннотацией @Validate
+     * <p>Если аннотация отсутствует или массив пуст, выводятся соответствующие сообщения.
+     * Метод безопасен к передаче {@code null}.</p>
+     *
+     * @param clazz класс с аннотацией {@link Validate}
      */
     public static void processValidateAnnotation(Class<?> clazz) {
         if (clazz == null) {
@@ -117,9 +156,12 @@ public class Main {
     }
 
     /**
-     * Выводит значения свойств аннотации @Two.
+     * Выводит значения параметров аннотации {@link Two}.
      *
-     * @param clazz класс с аннотацией @Two
+     * <p>Если аннотация отсутствует, выводится соответствующее сообщение.
+     * Метод безопасен к передаче {@code null}.</p>
+     *
+     * @param clazz класс с аннотацией {@link Two}
      */
     public static void processTwoAnnotation(Class<?> clazz) {
         if (clazz == null) {
@@ -135,9 +177,12 @@ public class Main {
     }
 
     /**
-     * Выводит список кешируемых областей из аннотации @Cache.
+     * Выводит список кешируемых областей из аннотации {@link Cache}.
      *
-     * @param clazz класс с аннотацией @Cache
+     * <p>Если аннотация отсутствует или массив пуст, выводятся соответствующие сообщения.
+     * Метод безопасен к передаче {@code null}.</p>
+     *
+     * @param clazz класс с аннотацией {@link Cache}
      */
     public static void processCacheAnnotation(Class<?> clazz) {
         if (clazz == null) {
@@ -158,13 +203,17 @@ public class Main {
     }
 
     /**
-     * Проверяет корректность значений аннотации @Two.
-     * Требования:
-     * - first не должен быть null или пустой строкой
-     * - second должен быть >= 0
+     * Проверяет корректность значений аннотации {@link Two}.
      *
-     * @param clazz класс, аннотированный @Two
-     * @throws IllegalArgumentException если значения не соответствуют требованиям
+     * <p>Требования к значениям:
+     * <ul>
+     *   <li>{@code first} не должен быть {@code null} или пустой строкой;</li>
+     *   <li>{@code second} должен быть больше или равен нулю.</li>
+     * </ul>
+     * </p>
+     *
+     * @param clazz класс, аннотированный {@link Two}
+     * @throws IllegalArgumentException если аннотация отсутствует или значения нарушают требования
      */
     public static void validateTwoAnnotation(Class<?> clazz) {
         if (clazz == null) {
@@ -188,10 +237,21 @@ public class Main {
 
     /**
      * Точка входа в программу.
-     * Демонстрирует работу всех аннотаций, включая доказательство работы @Invoke
-     * и пример валидации @Two.
      *
-     * @param args аргументы командной строки (не используются)
+     * <p>Демонстрирует работу всех разработанных аннотаций:
+     * <ul>
+     *   <li>автоматический вызов метода с {@code @Invoke};</li>
+     *   <li>чтение класса по умолчанию из {@code @Default};</li>
+     *   <li>формирование строкового представления с {@code @ToString};</li>
+     *   <li>вывод списка классов из {@code @Validate};</li>
+     *   <li>чтение и валидация параметров {@code @Two};</li>
+     *   <li>вывод кешируемых областей из {@code @Cache}.</li>
+     * </ul>
+     * </p>
+     *
+     * <p>Все операции выводятся в консоль для наглядности.</p>
+     *
+     * @param args аргументы командной строки (игнорируются)
      */
     public static void main(String[] args) {
         System.out.println(" ЛАБОРАТОРНАЯ РАБОТА №6: АННОТАЦИИ \n");
@@ -247,7 +307,5 @@ public class Main {
         System.out.println("1.6 @Cache:");
         processCacheAnnotation(CacheExample.class);
         System.out.println();
-
-
     }
 }
